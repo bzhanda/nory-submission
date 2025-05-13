@@ -1,0 +1,11 @@
+Regular item issues:
+- Duplicate items (e.g. Mushroom Portabello 1.5Kg and Mushroom Portobello 1.5Kg)
+- Non-numerical item size, item price or tax rate
+- Wrong item unit of measure (should only be g, kg, l, ml, ea)
+- Missing item price, tax rate, supplier code, item size or item unit of measure
+
+Regular recipe issues:
+- Ingredient in recipe not found in item list
+- Non-numerical ingredient quantity
+- Wrong item unit of measure (should only be g, kg, l, ml, ea) or not matching the item unit of measure
+- Incorrect ingredient quantity added leading to very high recipe cost (e.g. 20,000ml instead of 200ml)
