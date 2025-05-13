@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import json
-from rapidfuzz import process, fuzz  # Replaced fuzzywuzzy
+from rapidfuzz import process, fuzz
 
 class DataHealthAssistant:
     def __init__(self, data_dir="data"):
@@ -72,7 +72,7 @@ class DataHealthAssistant:
         
         # Clean tax rates (critical fix)
         self.items['Tax rate'] = pd.to_numeric(
-            self.items['Tax rate'].astype(str).str.replace('[%\s]', '', regex=True),
+            self.items['Tax rate'].astype(str).str.replace(r'[%\s]', '', regex=True),
             errors='coerce'
         )
 
@@ -85,7 +85,7 @@ class DataHealthAssistant:
             if pd.isna(item):
                 continue
             if item not in seen:
-                matches = process.extract(  # Updated for rapidfuzz
+                matches = process.extract(
                     item, items, 
                     scorer=fuzz.token_sort_ratio,
                     score_cutoff=threshold
@@ -111,9 +111,9 @@ class DataHealthAssistant:
         self.report['unit_issues']['items'] = item_issues.to_dict('records')
         
         # Recipe validation
-        item_unit_map = dict(zip(  # Built from cleaned data
-            self.items['Item name'],
-            self.items['Item Unit of Measure']
+        item_unit_map = dict(zip(
+            self.items['Item name'].str.lower(),
+            self.items['Item Unit of Measure'].str.lower()
         ))
         
         recipe_issues = []
@@ -122,10 +122,10 @@ class DataHealthAssistant:
         
         for _, row in self.recipes.iterrows():
             for i in range(1, 5):
-                ingredient = str(row[f'Name (Ingredient {i})']).lower().strip()  # Critical fix: added .strip()
+                ingredient = str(row[f'Name (Ingredient {i})']).lower().strip()
                 qty = row[f'Qty (Ingredient {i})']
                 unit_raw = row[f'Unit (Ingredient {i})']
-                unit = str(unit_raw).lower().strip() if pd.notna(unit_raw) else None  # Critical fix: added .strip()
+                unit = str(unit_raw).lower().strip() if pd.notna(unit_raw) else None
                 
                 # Unit validation
                 if unit and unit not in self.allowed_units:
@@ -180,7 +180,7 @@ class DataHealthAssistant:
             .isnull().any(axis=1)
         ]
         
-        # Tax rate validation (already numeric from clean_data)
+        # Tax rate validation
         tax_rate_issues = self.items[self.items['Tax rate'].isna()]
         
         self.report['missing_data'] = {
@@ -204,7 +204,7 @@ class DataHealthAssistant:
                     })
                     continue
                 
-                ingredient = str(ingredient_raw).lower().strip()  # Critical fix: added .strip()
+                ingredient = str(ingredient_raw).lower().strip()
                 if not ingredient:
                     issues.append({
                         'recipe': row['Menu item name'],
@@ -250,7 +250,7 @@ if __name__ == "__main__":
         print("\n" + "="*50)
         print(" COMPREHENSIVE DATA HEALTH REPORT ".center(50, '='))
         print("="*50)
-        print(f"Duplicate items: {len(report['duplicates']}")
+        print(f"Duplicate items: {len(report['duplicates'])}")  # Fixed parenthesis
         print(f"Invalid/mismatched units: {len(report['unit_issues']['items']) + len(report['unit_issues']['recipes'])}")
         print(f"Excessive quantities: {len(report['quantity_issues'])}")
         print(f"Missing ingredients: {len(report['recipe_issues'])}")
